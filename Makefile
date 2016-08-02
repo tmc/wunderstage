@@ -53,12 +53,16 @@ $(HOME)/.ssh/id_rsa-deis.pub:
 deis-key: $(HOME)/.ssh/id_rsa-deis.pub
 
 .deispw:
-	dd if=/dev/random bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > .deispw
-	deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat .deispw) --email=admin@foobar.com
+	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > .deispw
+
+.deispw-jenkins:
+	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > .deispw-jenkins
 
 .PHONY: deis-setup
-deis-setup: .deispw deis-key
-	deis keys:add ~/.ssh/id_rsa-deis.pub
+deis-setup: .deispw .deispw-jenkins deis-key
+	#deis keys:add ~/.ssh/id_rsa-deis.pub
+	#deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat .deispw) --email=admin@foobar.com
+	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat .deispw-jenkins) --email=ci@foobar.com
 
 .PHONY: deis-status
 deis-status:
