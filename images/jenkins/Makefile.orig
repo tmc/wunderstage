@@ -1,0 +1,14 @@
+<<<<<<< 7b3dac0e75426112a22bcf02909eef008f484b8f
+all: image
+
+image:
+	docker build -t jenkins .
+
+release: image
+	docker tag jenkins gcr.io/scriptdash-staging/jenkins
+	gcloud docker push gcr.io/scriptdash-staging/jenkins
+=======
+all:
+	gcloud compute --project "scriptdash-staging" disks create "wunderstage-storage-1" --size "200" --zone "us-central1-b" --type "pd-ssd"
+	kubectl create -f manifests
+>>>>>>> add makefile with storage line
