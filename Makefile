@@ -15,6 +15,9 @@ stage0: cluster-init
 .PHONY: stage1
 stage1: deis-install
 
+.PHONY: stage2
+stage2: jenkins-install
+
 
 .PHONY: images
 images:
@@ -68,3 +71,15 @@ deis-setup: .deispw .deispw-jenkins deis-key
 deis-status:
 	kubectl --namespace=deis get po
 	kubectl --namespace=deis describe svc deis-router | grep LoadBalancer
+
+.gopath:
+	go env GOPATH | cut -d: -f1 > .gopath
+
+bin/helm: .gopath
+	go get -v -u -d k8s.io/helm/cmd/helm
+	cd $(shell cat .gopath)/src/k8s.io/helm && make bootstrap && make
+	cp $(shell cat .gopath)/src/k8s.io/helm/bin/helm bin/helm
+	
+.PHONY: jenkins-install
+jenkins-install: bin/helm
+	helm target
