@@ -1,0 +1,62 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{template "fullname" .}}
+  labels:
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{template "fullname" .}}
+        release: {{.Release.Name | quote }}
+    spec:
+      containers:
+      - name: {{template "fullname" .}}
+        image: "gcr.io/{{ .Values.PROJECT }}/jenkins
+        imagePullPolicy: {{default "Always" .Values.pullPolicy}}
+        args:
+          - "-web.external-url=https://prometheus.scriptdash.com"
+        env:
+          - name: FOO
+            value: foo
+          - name: DEIS_BUILDER
+            valueFrom:
+              configMapKeyRef:
+                name: {{template "fullname" . }}
+                key: deis.builder
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: /var/jenkins_home
+          name: storage-volume
+        - mountPath: /etc/secrets
+          name: secrets-volume
+      - name: {{template "proxyname" .}}
+        image: "gcr.io/{{ .Values.PROJECT }}/nginx-ssl-proxy"
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        env:
+        - name: TARGET_SERVICE
+          value: "localhost:8080"
+        volumeMounts:
+        - mountPath: /etc/secrets
+          name: proxy-secrets-volume
+      volumes:
+        - name: dockersocket
+          hostPath:
+            path: /var/run/docker.sock
+        - name: secrets-volume
+          secret:
+            secretName: {{template "fullname" .}}
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: {{template "fullname" .}}
+        - name: proxy-secrets-volume
+          secret:
+            secretName: {{template "proxyname" .}}
+
