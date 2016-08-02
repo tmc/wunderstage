@@ -1,5 +1,7 @@
 all: images
 
+export PATH := $(PWD)/bin:$(PATH)
+
 CLUSTER_NAME ?= wunderstage-2
 
 .PHONY: images
@@ -19,12 +21,17 @@ deploy: release
 
 .PHONY: install-deis
 install-deis: bin/helmc
-	./bin/helmc target
-	./bin/helmc helmc repo add deis https://github.com/deis/charts
-	./bin/helmc fetch deis/workflow-v2.2.0
-	./bin/helmc generate -x manifests workflow-v2.2.0
-	./bin/helmc install workflow-v2.2.0
+	helmc target
+	helmc repo add deis https://github.com/deis/charts
+	helmc fetch deis/workflow-v2.2.0
+	helmc generate -x manifests workflow-v2.2.0
+	helmc install workflow-v2.2.0
 
 bin/helmc:
 	curl -sSL https://get.helm.sh | bash
 	mv ./helmc ./bin/helmc
+
+.PHONY: deis-status
+deis-status:
+	kubectl --namespace=deis get po
+
