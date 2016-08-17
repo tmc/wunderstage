@@ -16,10 +16,8 @@ spec:
     spec:
       containers:
       - name: {{template "fullname" .}}
-        image: "gcr.io/{{ .Values.PROJECT }}/jenkins
+        image: gcr.io/{{ .Values.PROJECT }}/jenkins
         imagePullPolicy: {{default "Always" .Values.pullPolicy}}
-        args:
-          - "-web.external-url=https://prometheus.scriptdash.com"
         env:
           - name: FOO
             value: foo
