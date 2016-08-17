@@ -76,10 +76,8 @@ deis-status:
 	go env GOPATH | cut -d: -f1 > .gopath
 
 bin/helm: .gopath
-	go get -v -u -d k8s.io/helm/cmd/helm
-	cd $(shell cat .gopath)/src/k8s.io/helm && make bootstrap && make
-	cp $(shell cat .gopath)/src/k8s.io/helm/bin/helm bin/helm
-	
+	curl https://github.com/kubernetes/helm/releases/download/v2.0.0-alpha.3/helm-v2.0.0-alpha.3-linux-amd64.tar | tar xvf- -C bin
+
 .PHONY: jenkins-install
 jenkins-install: bin/helm
 	helm target
