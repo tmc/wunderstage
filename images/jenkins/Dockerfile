@@ -1,7 +1,7 @@
 FROM jenkinsci/jenkins:latest
 
 # preinstall plugins
-RUN /usr/local/bin/install-plugins.sh docker-slaves github-branch-source
+RUN /usr/local/bin/install-plugins.sh github-branch-source github-oauth
 COPY custom.groovy /usr/share/jenkins/ref/init.groovy.d/custom.groovy
 
 USER root

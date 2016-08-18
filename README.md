@@ -87,6 +87,19 @@ $ kc logs ${POD} jenkins
 The bootstrapping process creates a self-signed certificate. Let's replace that with a certificate that is valid and matches our
 
 #### Configure Github integration
+
+To have activity on github automatically trigger builds we need to configure the github integration.
+
+Create a GitHub user that has read access to relevant repositories.
+
+Create a personal access token with the following scopes: **admin:repo_hook, repo, repo:status**.
+
+There are some alternatives here but for simplicity we'll employ Automatic Mode in which Jenkins manages hooks for us.
+
+See https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin for details.
+
 Steps:
 1. Walk through setup wizard and create an admin user.
-2. `Manage Jenkins` -> `Configure System`
+2. Enable proxy compatiblity under `Manage Jenkins` -> `Configure Security`
+3. `Manage Jenkins` -> `Configure System` -> `GitHub` -> `GitHub Servers` -> `Add GitHub Server`
+4. `Credentials` -> `Add` -> `Jenkins` -> `Username with password`
