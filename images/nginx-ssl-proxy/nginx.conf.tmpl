@@ -64,6 +64,9 @@ http {
       add_header Strict-Transport-Security max-age=15638400;
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
+      {{if eq .SKIP_AUTHENTICATION_HEADER "1" }}
+      proxy_set_header   Authorization "";
+      {{end}}
      
       location / {
           proxy_set_header        Host $host;
