@@ -7,5 +7,5 @@ image:
 	docker build -t nginx-ssl-proxy .
 
 release: image
-	docker tag -f jenkins $(REGISTRY)/$(PROJECT)/nginx-ssl-proxy
+	docker tag -f nginx-ssl-proxy $(REGISTRY)/$(PROJECT)/nginx-ssl-proxy
 	gcloud docker push $(REGISTRY)/$(PROJECT)/nginx-ssl-proxy
