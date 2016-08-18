@@ -19,8 +19,6 @@ spec:
         image: gcr.io/{{ .Values.PROJECT }}/jenkins
         imagePullPolicy: {{default "Always" .Values.pullPolicy}}
         env:
-          - name: FOO
-            value: foo
           - name: DEIS_BUILDER
             valueFrom:
               configMapKeyRef:
