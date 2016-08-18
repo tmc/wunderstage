@@ -54,28 +54,21 @@ deis-install: bin/helmc
 $(HOME)/.ssh/id_rsa-deis.pub:
 	ssh-keygen -t rsa -N "" -f $(HOME)/.ssh/id_rsa-deis
 
-.PHONY: deis-key
-deis-key: $(HOME)/.ssh/id_rsa-deis.pub
-
-
 secrets/.deispw:
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
 
 secrets/.deispw-jenkins:
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
 
-.PHONY: deis-setup
-deis-setup: bin/deis .deispw .deispw-jenkins deis-key
-	#deis keys:add ~/.ssh/id_rsa-deis.pub
-	#deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat .deispw) --email=admin@foobar.com
-	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat .deispw-jenkins) --email=ci@foobar.com
-
 .PHONY: deis-status
 deis-status:
 	kubectl --namespace=deis get po
 	kubectl --namespace=deis describe svc deis-router | grep LoadBalancer
 
-charts/jenkins/jenkins-deis-conf.json: deis-setup
+charts/jenkins/jenkins-deis-conf.json: bin/deis secrets/.deispw secrets/.deispw-jenkins $(HOME)/.ssh/id_rsa-deis.pub
+	deis keys:add ~/.ssh/id_rsa-deis.pub
+	deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat secrets/.deispw) --email=admin@foobar.com
+	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat secrets/.deispw-jenkins) --email=ci@foobar.com
 	cp ~/.deis/jenkins.json $@
 
 .gopath:
@@ -101,5 +94,5 @@ jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam chart
 	helm version
 	helm init
 	sleep 4
-	cd secrets && kubectl create secret generic jenkins-1-proxy --from-file=cert.pem --from-file=key.pem --from-file=dhparam --from-file=htpasswd
-	helm install --set PROJECT=$(PROJECT) -n jenkins-1 charts/jenkins
+	cd secrets && kubectl create secret generic jenkins-1-proxy --from-file=cert.pem --from-file=key.pem --from-file=dhparam --from-file=htpasswd || echo 'already present'
+	helm install --set PROJECT=$(PROJECT) --set deisBuilder=deis-builder.$(DEIS_IP).nip.io -n jenkins-1 charts/jenkins
