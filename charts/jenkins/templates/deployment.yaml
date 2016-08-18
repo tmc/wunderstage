@@ -31,6 +31,8 @@ spec:
           name: storage-volume
         - mountPath: /etc/secrets
           name: secrets-volume
+        - mountPath: /var/run/docker.sock
+          name: dockersocket
       - name: fixperms
         image: alpine
         args:
