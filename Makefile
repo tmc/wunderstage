@@ -80,7 +80,7 @@ bin/helm:
 	rmdir bin/linux-amd64
 
 secrets/htpasswd: secrets/.deispw-jenkins
-	echo "jenkins:$(shell cat secrets/.deispw-jenkins)" > $@
+	echo "jenkins:$(shell cat secrets/.deispw-jenkins | openssl passwd -stdin)" > secrets/htpasswd
 
 secrets/key.pem:
 	cd secrets && openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=CA/L=SF/O=Ops/CN=ci.$(DEIS_IP)" -nodes
