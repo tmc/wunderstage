@@ -91,13 +91,13 @@ secrets/dhparam:
 
 .PHONY: jenkins-install
 jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam charts/jenkins/jenkins-deis-conf.json
-	helm version
-	helm init
-	sleep 4
-	cp secrets/* charts/jenkins/
-	helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-1 charts/jenkins
-    echo "running `kubectl --namespace=ci describe svc ci-1-proxy` to inspect service`"
-    kubectl --namespace=ci describe svc ci-1-proxy` to inspect service
-    echo "sleeping 10s then running again"
-    sleep 10
+	 helm version
+	 helm init
+	 sleep 5
+	 cp secrets/* charts/jenkins/
+	 helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-1 charts/jenkins
+	 echo "running `kubectl --namespace=ci describe svc ci-1-proxy` to inspect service`"
+	 kubectl --namespace=ci describe svc ci-1-proxy` to inspect service
+	 echo "sleeping 10s then running again"
+	 sleep 10
 	kubectl --namespace=ci describe svc ci-1-proxy` to inspect service
