@@ -15,7 +15,7 @@ spec:
         release: {{.Release.Name | quote }}
     spec:
       containers:
-      - name: {{template "fullname" .}}
+      - name: jenkins
         image: gcr.io/{{ .Values.PROJECT }}/jenkins
         imagePullPolicy: {{default "Always" .Values.pullPolicy}}
         env:
@@ -42,7 +42,7 @@ spec:
           name: storage-volume
         - mountPath: /etc/secrets
           name: secrets-volume
-      - name: {{template "proxyname" .}}
+      - name: proxy
         image: "gcr.io/{{ .Values.PROJECT }}/nginx-ssl-proxy"
         ports:
         - containerPort: 443
