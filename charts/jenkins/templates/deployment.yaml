@@ -50,6 +50,8 @@ spec:
         env:
         - name: TARGET_SERVICE
           value: "localhost:8080"
+        - name: SKIP_AUTHENTICATION_HEADER
+          value: "1"
         volumeMounts:
         - mountPath: /etc/secrets
           name: proxy-secrets-volume
