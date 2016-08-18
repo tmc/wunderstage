@@ -64,9 +64,6 @@ http {
       add_header Strict-Transport-Security max-age=15638400;
       add_header X-Frame-Options DENY;
       add_header X-Content-Type-Options nosniff;
-      {{if eq .SKIP_AUTHENTICATION_HEADER "1" }}
-      proxy_set_header   Authorization "";
-      {{end}}
      
       location / {
           proxy_set_header        Host $host;
@@ -74,6 +71,9 @@ http {
           proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header        X-Forwarded-Proto $scheme;
           proxy_set_header        X-Forwarded-Host $http_host;
+          {{if eq .SKIP_AUTHENTICATION_HEADER "1" }}
+          proxy_set_header   Authorization "";
+          {{end}}
           proxy_pass              http://target_service;
           proxy_read_timeout      90;
           proxy_redirect          http:// https://;
