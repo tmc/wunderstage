@@ -94,5 +94,5 @@ jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam chart
 	helm version
 	helm init
 	sleep 4
-	cd secrets && kubectl create secret generic jenkins-1-proxy --from-file=cert.pem --from-file=key.pem --from-file=dhparam --from-file=htpasswd || echo 'already present'
-	helm install --set PROJECT=$(PROJECT) --set deisBuilder=deis-builder.$(DEIS_IP).nip.io -n jenkins-1 charts/jenkins
+	cd secrets && kubectl create secret generic jenkins-2-proxy --from-file=cert.pem --from-file=key.pem --from-file=dhparam --from-file=htpasswd || echo 'already present'
+	helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-1 charts/jenkins

@@ -39,7 +39,7 @@ spec:
         - "mkdir /var/jenkins_home/.deis || echo; cp /etc/secrets/staging.json /var/jenkins_home/.deis/client.json; chown -R 1000:1000 /var/jenkins_home; cp -rv /var/jenkins_home/.deis /root/; sleep 1000"
         volumeMounts:
         - mountPath: /var/jenkins_home
-          name: jenkins-volume
+          name: storage-volume
         - mountPath: /etc/secrets
           name: secrets-volume
       - name: {{template "proxyname" .}}
