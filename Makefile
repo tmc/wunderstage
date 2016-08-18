@@ -4,6 +4,7 @@ export PATH := $(PWD)/bin:$(PATH)
 
 CLUSTER_NAME ?= wunderstage-2
 WORKFLOW_VERSION ?= v2.3.0
+PROJECT ?= $(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
 DEIS_IP := $(shell sh -c 'kubectl --namespace=deis describe svc deis-router |grep "LoadBalancer Ingress" | cut -f2')
 DEIS_ENDPOINT := http://deis.$(DEIS_IP).nip.io
 
@@ -56,11 +57,12 @@ $(HOME)/.ssh/id_rsa-deis.pub:
 .PHONY: deis-key
 deis-key: $(HOME)/.ssh/id_rsa-deis.pub
 
-.deispw:
-	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > .deispw
 
-.deispw-jenkins:
-	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > .deispw-jenkins
+secrets/.deispw:
+	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
+
+secrets/.deispw-jenkins:
+	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
 
 .PHONY: deis-setup
 deis-setup: bin/deis .deispw .deispw-jenkins deis-key
@@ -84,8 +86,17 @@ bin/helm:
 	mv bin/linux-amd64/* bin/
 	rmdir bin/linux-amd64
 
+secrets/htpasswd: secrets/.deispw-jenkins
+	htpasswd -nb jenkins $(shell cat secrets/.deispw-jenkins) > $@
+
+secrets/key.pem:
+	cd secrets && openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=CA/L=SF/O=Ops/CN=ci.$(DEIS_IP)" -nodes
+
+
 .PHONY: jenkins-install
-jenkins-install: bin/helm charts/jenkins/jenkins-deis-conf.json
+jenkins-install: bin/helm secrets/key.pam secrets/htpasswd charts/jenkins/jenkins-deis-conf.json
 	helm version
 	helm init
+	sleep 4
+	cd secrets && create secret generic jenkins-1-proxy --from-file=cert.pem --from-file=key.pem --from-file=dhparam --from-file=htpasswd
 	helm install -n jenkins-1 charts/jenkins
