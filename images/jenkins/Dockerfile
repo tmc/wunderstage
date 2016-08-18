@@ -13,9 +13,14 @@ RUN echo 'deb https://apt.dockerproject.org/repo debian-jessie main' > /etc/apt/
 RUN apt-get update
 RUN apt-get install -y docker-engine=1.9.1-0~jessie # version on gce at time of writing
 RUN gpasswd -a jenkins docker
-RUN wget https://storage.googleapis.com/workflow-cli/v2.1.0/deis-v2.1.0-linux-amd64; mv deis-v2.1.0-linux-amd64 /usr/local/bin/deis; chmod +x /usr/local/bin/deis
-RUN wget https://storage.googleapis.com/kubernetes-release/release/v1.2.4/bin/linux/amd64/kubectl; mv kubectl /usr/local/bin/kubectl; chmod +x /usr/local/bin/kubectl
-RUN wget https://bintray.com/deis/helm/download_file?file_path=helmc-0.8.1%2Be4b3983-linux-amd64.zip && unzip *helm*.zip; mv helmc /usr/local/bin/helmc
+ENV DEIS_VERSION v2.3.0
+ENV KUBECTL_VERSION v1.3.4
+ENV HELMC_VERSION 0.8.1%2Be4b3983
+ENV HELM_VERSION v2.0.0-alpha.3
+RUN wget https://storage.googleapis.com/workflow-cli/${DEIS_VERSION}/deis-${DEIS_VERSION}-linux-amd64; mv deis-${DEIS_VERSION}-linux-amd64 /usr/local/bin/deis; chmod +x /usr/local/bin/deis
+RUN wget https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl; mv kubectl /usr/local/bin/kubectl; chmod +x /usr/local/bin/kubectl
+RUN wget https://bintray.com/deis/helm/download_file?file_path=helmc-${HELMC_VERSION}-linux-amd64.zip && unzip *helm*.zip; mv helmc /usr/local/bin/helmc
+RUN wget https://github.com/kubernetes/helm/releases/download/${HELM_VERSION}/helm-${HELM_VERSION}-linux-amd64.tar; tar xf ./helm-${HELM_VERSION}-linux-amd64.tar; mv linux-amd64/* /usr/local/bin/
 
 # TODO(tmc) run dind docker in separate container?
 #ENV DOCKER_HOST localhost:237
