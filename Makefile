@@ -18,10 +18,13 @@ stage0: cluster-init
 stage1: images-release
 
 .PHONY: stage2
-stage2: deis-install
+stage2: deis-fetch
 
 .PHONY: stage3
-stage3: jenkins-install
+stage3: deis-install
+
+.PHONY: stage4
+stage4: jenkins-install
 
 
 .PHONY: images
@@ -46,11 +49,14 @@ bin/deis:
 	curl -sSL http://deis.io/deis-cli/install-v2.sh | bash
 	mv ./deis ./bin/deis
 
+.PHONY: deis-fetch
+deis-fetch: bin/helmc
+	helmc target
+	helmc repo add deis https://github.com/deis/charts || echo
+	helmc fetch deis/workflow-$(WORKFLOW_VERSION)
+
 .PHONY: deis-install
 deis-install: bin/helmc
-	helmc target
-	helmc repo add deis https://github.com/deis/charts
-	helmc fetch deis/workflow-$(WORKFLOW_VERSION)
 	helmc generate -x manifests workflow-$(WORKFLOW_VERSION)
 	helmc install workflow-$(WORKFLOW_VERSION)
 
