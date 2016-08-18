@@ -62,7 +62,9 @@ http {
       ssl_stapling_verify on;
      
       add_header Strict-Transport-Security max-age=15638400;
-      add_header X-Frame-Options DENY;
+      {{if neq .X_FRAME_OPTIONS "" }}
+      add_header X-Frame-Options {{.X_FRAME_OPTIONS}};
+      {{end}}
       add_header X-Content-Type-Options nosniff;
      
       location / {
