@@ -15,17 +15,20 @@ HAS_K8SCLUSTER := $(shell kubectl cluster-info > /dev/null;)
 stage0: cluster-init
 
 .PHONY: stage1
-stage1: deis-install
+stage1: images-release
 
 .PHONY: stage2
-stage2: jenkins-install
+stage2: deis-install
+
+.PHONY: stage3
+stage3: jenkins-install
 
 
 .PHONY: images
 images:
 	$(MAKE) -C images images
 
-.PHONY: release
+.PHONY: images-release
 release: images
 	$(MAKE) -C images release
 
@@ -33,7 +36,7 @@ release: images
 deploy: release
 
 .PHONY: cluster-init
-	gcloud clusters create $(CLUSTER_NAME) --zone "us-west1-b" --machine-type "n1-standard-1" --scopes "https://www.googleapis.com/auth/compute","https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly" --num-nodes "3" --network "default" --enable-cloud-logging --enable-cloud-monitoring
+	gcloud containers clusters create $(CLUSTER_NAME) --zone "us-west1-b" --machine-type "n1-standard-1" --scopes "https://www.googleapis.com/auth/compute","https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly" --num-nodes "3" --network "default" --enable-cloud-logging --enable-cloud-monitoring
 
 bin/helmc:
 	curl -sSL https://get.helm.sh | bash
