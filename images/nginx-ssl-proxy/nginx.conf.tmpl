@@ -62,7 +62,7 @@ http {
       ssl_stapling_verify on;
      
       add_header Strict-Transport-Security max-age=15638400;
-      {{if ne .X_FRAME_OPTIONS "" }}
+      {{if .X_FRAME_OPTIONS}}
       add_header X-Frame-Options {{.X_FRAME_OPTIONS}};
       {{end}}
       add_header X-Content-Type-Options nosniff;
@@ -73,7 +73,7 @@ http {
           proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header        X-Forwarded-Proto $scheme;
           proxy_set_header        X-Forwarded-Host $http_host;
-          {{if eq .SKIP_AUTHENTICATION_HEADER "1" }}
+          {{if eq (default "" .SKIP_AUTHENTICATION_HEADER) "1" }}
           proxy_set_header   Authorization "";
           {{end}}
           proxy_pass              http://target_service;
