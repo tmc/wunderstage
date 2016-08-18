@@ -3,6 +3,7 @@ all: images
 export PATH := $(PWD)/bin:$(PATH)
 
 CLUSTER_NAME ?= wunderstage-2
+WORKFLOW_VERSION ?= v2.3.0
 DEIS_IP := $(shell sh -c 'kubectl --namespace=deis describe svc deis-router |grep "LoadBalancer Ingress" | cut -f2')
 DEIS_ENDPOINT := http://deis.$(DEIS_IP).nip.io
 
@@ -45,9 +46,9 @@ bin/deis:
 deis-install: bin/helmc
 	helmc target
 	helmc repo add deis https://github.com/deis/charts
-	helmc fetch deis/workflow-v2.2.0
-	helmc generate -x manifests workflow-v2.2.0
-	helmc install workflow-v2.2.0
+	helmc fetch deis/workflow-$(WORKFLOW_VERSION)
+	helmc generate -x manifests workflow-$(WORKFLOW_VERSION)
+	helmc install workflow-$(WORKFLOW_VERSION)
 
 $(HOME)/.ssh/id_rsa-deis.pub:
 	ssh-keygen -t rsa -N "" -f $(HOME)/.ssh/id_rsa-deis
@@ -62,7 +63,7 @@ deis-key: $(HOME)/.ssh/id_rsa-deis.pub
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > .deispw-jenkins
 
 .PHONY: deis-setup
-deis-setup: .deispw .deispw-jenkins deis-key
+deis-setup: bin/deis .deispw .deispw-jenkins deis-key
 	#deis keys:add ~/.ssh/id_rsa-deis.pub
 	#deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat .deispw) --email=admin@foobar.com
 	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat .deispw-jenkins) --email=ci@foobar.com
@@ -71,6 +72,9 @@ deis-setup: .deispw .deispw-jenkins deis-key
 deis-status:
 	kubectl --namespace=deis get po
 	kubectl --namespace=deis describe svc deis-router | grep LoadBalancer
+
+charts/jenkins/jenkins-deis-conf.json: deis-setup
+	cp ~/.deis/jenkins.json $@
 
 .gopath:
 	go env GOPATH | cut -d: -f1 > .gopath
@@ -81,7 +85,7 @@ bin/helm:
 	rmdir bin/linux-amd64
 
 .PHONY: jenkins-install
-jenkins-install: bin/helm
+jenkins-install: bin/helm charts/jenkins/jenkins-deis-conf.json
 	helm version
 	helm init
 	helm install -n jenkins-1 charts/jenkins
