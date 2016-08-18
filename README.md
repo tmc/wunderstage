@@ -110,7 +110,28 @@ Steps:
 1. `Manage Jenkins` -> `Configure Global Security` -> `Access Control` -> `Security Realm` - set to Github Authentication Plugin.
 2. Enter oAuth client id and secret key.
 
-
 Now let's set up our project:
 1. Navigate to Jenkins home.
 2. `create new jobs` -> `GitHub Organization`. Choose a name.
+3. Add credentials for scanning using the personal access token as the password.
+
+
+#### Jenkinsfile
+
+We now are ready to start preparing builds. In one of the repositories in your project create a Jenkinsfile:
+
+```Jenkinsfile
+foo
+```
+
+**note:** You may notice a failure that has to do with unapproved methods, if so carefully approve said methods via `Manage Jenkins` -> `In-process Script Approval`.
+
+#### Enabling deis in Jenkins jobs
+
+To enable running deis commands in Jenkins jobs we need to provide the jenkins deis user private ssh key as a Jenkins credential.
+
+The contents of this file are placed in $PWD/secrets/id_rsa-deis.
+
+Create a Jenkins ssh credential with the ID  of 'deis-key'.
+
+#### 

@@ -1,7 +1,7 @@
 FROM jenkinsci/jenkins:latest
 
 # preinstall plugins
-RUN /usr/local/bin/install-plugins.sh github-branch-source github-oauth
+RUN /usr/local/bin/install-plugins.sh github-branch-source github-oauth ssh-agent 
 COPY custom.groovy /usr/share/jenkins/ref/init.groovy.d/custom.groovy
 
 USER root
