@@ -84,4 +84,4 @@ bin/helm:
 jenkins-install: bin/helm
 	helm version
 	helm init
-	helm install charts/jenkins
+	helm install -n jenkins-1 charts/jenkins
