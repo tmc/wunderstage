@@ -87,16 +87,19 @@ bin/helm:
 	rmdir bin/linux-amd64
 
 secrets/htpasswd: secrets/.deispw-jenkins
-	htpasswd -nb jenkins $(shell cat secrets/.deispw-jenkins) > $@
+	echo "jenkins:$(shell cat secrets/.deispw-jenkins)" > $@
 
 secrets/key.pem:
 	cd secrets && openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=CA/L=SF/O=Ops/CN=ci.$(DEIS_IP)" -nodes
 
+secrets/dhparam:
+	openssl dhparam -out secrets/dhparam 2048 -dsaparam
+
 
 .PHONY: jenkins-install
-jenkins-install: bin/helm secrets/key.pam secrets/htpasswd charts/jenkins/jenkins-deis-conf.json
+jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam charts/jenkins/jenkins-deis-conf.json
 	helm version
 	helm init
 	sleep 4
-	cd secrets && create secret generic jenkins-1-proxy --from-file=cert.pem --from-file=key.pem --from-file=dhparam --from-file=htpasswd
-	helm install -n jenkins-1 charts/jenkins
+	cd secrets && kubectl create secret generic jenkins-1-proxy --from-file=cert.pem --from-file=key.pem --from-file=dhparam --from-file=htpasswd
+	helm install --set PROJECT=$(PROJECT) -n jenkins-1 charts/jenkins
