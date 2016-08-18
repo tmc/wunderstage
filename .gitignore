@@ -3,3 +3,7 @@
 .gopath
 secrets/
 charts/jenkins/jenkins-deis-conf.json
+charts/jenkins/cert.pem
+charts/jenkins/dhparam
+charts/jenkins/htpasswd
+charts/jenkins/key.pem
