@@ -97,7 +97,7 @@ jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam chart
 	 cp secrets/* charts/jenkins/
 	 helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-1 charts/jenkins
 	 echo "running `kubectl --namespace=ci describe svc ci-1-proxy` to inspect service`"
-	 kubectl --namespace=ci describe svc ci-1-proxy` to inspect service
+	 kubectl --namespace=ci describe svc ci-1-proxy | grep Ingress
 	 echo "sleeping 10s then running again"
 	 sleep 10
-	kubectl --namespace=ci describe svc ci-1-proxy` to inspect service
+	 kubectl --namespace=ci describe svc ci-1-proxy | grep Ingress
