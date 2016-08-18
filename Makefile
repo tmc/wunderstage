@@ -54,8 +54,21 @@ deis-install: bin/helmc
 	helmc generate -x manifests workflow-$(WORKFLOW_VERSION)
 	helmc install workflow-$(WORKFLOW_VERSION)
 
-$(HOME)/.ssh/id_rsa-deis.pub:
-	ssh-keygen -t rsa -N "" -f $(HOME)/.ssh/id_rsa-deis
+.PHONY: deis-status
+deis-status:
+	kubectl --namespace=deis get po
+	kubectl --namespace=deis describe svc deis-router | grep LoadBalancer
+
+bin/helm:
+	curl -L https://github.com/kubernetes/helm/releases/download/v2.0.0-alpha.3/helm-v2.0.0-alpha.3-linux-amd64.tar | tar -C bin -xvf - 
+	mv bin/linux-amd64/* bin/
+	rmdir bin/linux-amd64
+
+
+## secrets 
+
+secrets/id_rsa-deis.pub:
+	ssh-keygen -t rsa -N "" -f secrets/id_rsa-deis
 
 secrets/.deispw:
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
@@ -63,24 +76,11 @@ secrets/.deispw:
 secrets/.deispw-jenkins:
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
 
-.PHONY: deis-status
-deis-status:
-	kubectl --namespace=deis get po
-	kubectl --namespace=deis describe svc deis-router | grep LoadBalancer
-
-charts/jenkins/jenkins-deis-conf.json: bin/deis secrets/.deispw secrets/.deispw-jenkins $(HOME)/.ssh/id_rsa-deis.pub
-	deis keys:add ~/.ssh/id_rsa-deis.pub
+charts/jenkins/jenkins-deis-conf.json: bin/deis secrets/.deispw secrets/.deispw-jenkins secrets/id_rsa-deis.pub
+	deis keys:add secrets/id_rsa-deis.pub
 	deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat secrets/.deispw) --email=admin@foobar.com
 	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat secrets/.deispw-jenkins) --email=ci@foobar.com
 	cp ~/.deis/jenkins.json $@
-
-.gopath:
-	go env GOPATH | cut -d: -f1 > .gopath
-
-bin/helm:
-	curl -L https://github.com/kubernetes/helm/releases/download/v2.0.0-alpha.3/helm-v2.0.0-alpha.3-linux-amd64.tar | tar -C bin -xvf - 
-	mv bin/linux-amd64/* bin/
-	rmdir bin/linux-amd64
 
 secrets/htpasswd: secrets/.deispw-jenkins
 	echo "jenkins:$(shell cat secrets/.deispw-jenkins | openssl passwd -stdin)" > secrets/htpasswd

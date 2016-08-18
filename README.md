@@ -90,9 +90,10 @@ The bootstrapping process creates a self-signed certificate. Let's replace that 
 
 To have activity on github automatically trigger builds we need to configure the github integration.
 
-Create a GitHub user that has read access to relevant repositories.
-
-Create a personal access token with the following scopes: **admin:repo_hook, repo, repo:status**.
+Prerequisites:
+1. Create a GitHub user that has read access to relevant repositories.
+2. Create a personal access token with the following scopes: **admin:repo_hook, repo, repo:status**.
+3. (optional) Create an oAuth application to use GitHub for authentication.
 
 There are some alternatives here but for simplicity we'll employ Automatic Mode in which Jenkins manages hooks for us.
 
@@ -100,6 +101,16 @@ See https://wiki.jenkins-ci.org/display/JENKINS/GitHub+Plugin for details.
 
 Steps:
 1. Walk through setup wizard and create an admin user.
-2. Enable proxy compatiblity under `Manage Jenkins` -> `Configure Security`
-3. `Manage Jenkins` -> `Configure System` -> `GitHub` -> `GitHub Servers` -> `Add GitHub Server`
-4. `Credentials` -> `Add` -> `Jenkins` -> `Username with password`
+2. Enable proxy compatiblity under `Manage Jenkins` -> `Configure Security`.
+3. `Manage Jenkins` -> `Configure System` -> `GitHub` -> `GitHub Servers` -> `Add GitHub Server`.
+4. `Credentials` -> `Add` -> `Jenkins` -> `Secret Text` -> enter your access token.
+5. Replace https with http in `Advanced` -> `Override Hook URL`.
+
+(optional) To set up GitHub oAuth for authentication:
+1. `Manage Jenkins` -> `Configure Global Security` -> `Access Control` -> `Security Realm` - set to Github Authentication Plugin.
+2. Enter oAuth client id and secret key.
+
+
+Now let's set up our project:
+1. Navigate to Jenkins home.
+2. `create new jobs` -> `GitHub Organization`. Choose a name.
