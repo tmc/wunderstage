@@ -36,6 +36,8 @@ $ make stage1
 $ make stage2
 ```
 
+* **Verification**: `kubectl --namespace=deis get po` shows all pods running.
+
 ## Stage 3
 
 At this point we have Deis ready to install but there are some considerations. The default configuration uses ephemeral storage so at this point to may want to configure persistent storage.
