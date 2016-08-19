@@ -167,7 +167,43 @@ Now let's set up our project:
 We now are ready to start preparing builds. In one of the repositories in your project create a Jenkinsfile:
 
 ```Jenkinsfile
-foo
+node {
+	stage 'Initialize'
+		env.HOME = "${env.JENKINS_HOME}"
+		env.STAGING_NAME = "${env.JOB_NAME.replaceFirst(/.+?\//, '').replaceAll(/[.-\/]/,'-').take(24)}"
+
+	stage 'Initialize Staging'
+		sh "rm -f .deisinfo"
+		sh "deis info -a ${env.STAGING_NAME} > .deisinfo || echo"
+		def appinfo = readFile('.deisinfo')
+		if (appinfo.contains('created:')) {
+			echo "already initialized deis"
+			sh "deis git:remote -a ${env.STAGING_NAME} -r ${env.STAGING_NAME} || echo"
+		} else {
+			sh "deis create ${env.STAGING_NAME} -r ${env.STAGING_NAME} || echo"
+		}
+
+	stage 'Stage'
+		sshagent(['deis-key']) {
+			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: 'gnome-terminal']) {
+				retry(3) {
+					sh "git push -f ${env.STAGING_NAME} HEAD:refs/heads/${env.BRANCH_NAME}"
+				}
+			}
+		}
+
+	stage 'Seed DB'
+	wrap([$class: 'AnsiColorBuildWrapper', colorMapName: 'gnome-terminal']) {
+		retry(3) {
+			sh "bash -x script/staging-init.sh"
+		}
+	}
+
+	stage 'Staging Info'
+	sh "deis logs -a ${env.STAGING_NAME}"
+	sh "deis info -a ${env.STAGING_NAME}"
+	echo "completed."
+}
 ```
 
 **note:** You may notice a failure that has to do with unapproved methods, if so carefully approve said methods via `Manage Jenkins` -> `In-process Script Approval`.
