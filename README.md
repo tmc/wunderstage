@@ -216,7 +216,11 @@ The contents of this file are placed in $PWD/secrets/id_rsa-deis.
 
 Create a Jenkins ssh credential with the ID  of 'deis-key' and select 'From a file on Jenkins master' with the path `/etc/secrets/jenkins-ssh-key`
 
-#### 
+## Production Considerations
+
+At minimum you should change REGISTRATION mode on deis-controller.
+
+See https://deis.com/docs/workflow/managing-workflow/production-deployments
 
 
 
