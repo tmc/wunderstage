@@ -83,9 +83,9 @@ secrets/.deispw-jenkins:
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
 
 charts/jenkins/jenkins-deis-conf.json: bin/deis secrets/.deispw secrets/.deispw-jenkins secrets/id_rsa-deis.pub
-	deis keys:add secrets/id_rsa-deis.pub
 	deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat secrets/.deispw) --email=admin@foobar.com
 	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat secrets/.deispw-jenkins) --email=ci@foobar.com
+	DEIS_PROFILE=jenkins deis keys:add secrets/id_rsa-deis.pub
 	cp ~/.deis/jenkins.json $@
 
 secrets/htpasswd: secrets/.deispw-jenkins
@@ -110,3 +110,7 @@ jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam chart
 	 echo "sleeping 10s then running again"
 	 sleep 10
 	 kubectl --namespace=ci describe svc ci-1-proxy | grep Ingress
+
+.PHONY: jenkins-reinstall
+jenkins-reinstall:
+	helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-foobar charts/jenkins --debug --dry-run | sed '1,/MANIFEST:/d' | sed 's/ci-foobar/ci-1/g' | kubectl --namespace=ci apply -f -
