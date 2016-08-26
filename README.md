@@ -170,7 +170,9 @@ We now are ready to start preparing builds. In one of the repositories in your p
 node {
 	stage 'Initialize'
 		env.HOME = "${env.JENKINS_HOME}"
-		env.STAGING_NAME = "${env.JOB_NAME.replaceFirst(/.+?\//, '').replaceAll(/[.-\/]/,'-').take(24)}"
+		// deis and kubernetes have some restrictions on names, so we massage JOB_NAME a bit
+		// app name must be a rfc1035/rfc1123 label (DNS_LABEL): An alphanumeric (a-z, and 0-9) string, with a maximum length of 24 characters, with the '-' character allowed anywhere except the first or last character. Currently limited to 24 characters: https://github.com/deis/workflow/issues/212
+		env.STAGING_NAME = "${env.JOB_NAME.replaceFirst(/.+?\//, '').replaceAll(/[.-\/_]/,'-').toLowerCase().take(24).replaceFirst(/-$/, '')}"
 
 	stage 'Initialize Staging'
 		sh "rm -f .deisinfo"
