@@ -11,8 +11,8 @@ RUN apt-get update
 RUN apt-get install -y docker-engine=1.9.1-0~jessie # version on gce at time of writing
 RUN gpasswd -a jenkins docker
 ENV DEIS_VERSION stable
-ENV KUBECTL_VERSION v1.4.3
-ENV HELM_VERSION v2.0.0-alpha.5
+ENV KUBECTL_VERSION v1.4.5
+ENV HELM_VERSION v2.0.0-rc.2
 RUN wget https://storage.googleapis.com/workflow-cli-release/deis-${DEIS_VERSION}-linux-amd64; mv deis-${DEIS_VERSION}-linux-amd64 /usr/local/bin/deis
 RUN wget https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl; mv kubectl /usr/local/bin/kubectl; chmod +x /usr/local/bin/kubectl
 RUN wget https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz; tar xf ./helm-${HELM_VERSION}-linux-amd64.tar.gz; mv linux-amd64/* /usr/local/bin/
