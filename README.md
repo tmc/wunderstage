@@ -32,10 +32,17 @@ $ make stage1
 
 ## Stage 2 - install Deis
 
+* **Prerequisites**: (GKE) a valid service account key
+
 At this point we have Deis ready to install but there are some considerations. The default configuration uses ephemeral storage so at this point to may want to configure persistent storage.
 See https://deis.com/docs/workflow/installing-workflow/configuring-object-storage/ for details.
 
-Once you're done editing relevant files you can move on:
+**(GKE)** Steps:
+
+1. Create a service account at https://console.cloud.google.com/apis/credentials/serviceaccountkey - give the service account the `Storage Admin` role. ![example service account setup](gke-service-account.png)
+2. create `values.yaml` using `values.yaml.gke_example` as a guide.
+
+Once you're done setting up `values.yaml` (or making it blank to accept defaults):
 
 ```sh
 $ make stage2

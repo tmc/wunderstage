@@ -1,0 +1,17 @@
+global:
+  storage: gcs
+  registry_location: gcs
+
+gcs:
+  key_json: 'Past JSON data here.'
+  registry_bucket: "your-registry-bucket-name"
+  database_bucket: "your-database-bucket-name"
+  builder_bucket: "your-builder-bucket-name"
+
+controller:
+  app_pull_policy: "Always"
+  registration_mode: "admin_only"
+
+registry-token-refresher:
+  gcr:
+    key_json: 'Paste JSON data here.'
