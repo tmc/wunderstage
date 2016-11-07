@@ -7,9 +7,8 @@ Installing wunderstage is comprised of three stages:
 
 * stage0 - provisions a Kubernetes cluster.
 * stage1 - builds necessary images.
-* stage2 - prepares PaaS framework (Deis).
-* stage3 - installs PaaS framework (Deis).
-* stage4 - installs Jenkins.
+* stage2 - installs PaaS framework (Deis).
+* stage3 - installs Jenkins.
 
 These commands are designed to be run withing a Google Cloud Shell for maximum simplicity but can be adapted for other Kubernetes environments.
 
@@ -31,14 +30,7 @@ $ make stage0
 $ make stage1
 ```
 
-## Stage 2 - prepare Deis
-```sh
-$ make stage2
-```
-
-* **Verification**: `kubectl --namespace=deis get po` shows all pods running.
-
-## Stage 3 - install Deis
+## Stage 2 - install Deis
 
 At this point we have Deis ready to install but there are some considerations. The default configuration uses ephemeral storage so at this point to may want to configure persistent storage.
 See https://deis.com/docs/workflow/installing-workflow/configuring-object-storage/ for details.
@@ -46,10 +38,10 @@ See https://deis.com/docs/workflow/installing-workflow/configuring-object-storag
 Once you're done editing relevant files you can move on:
 
 ```sh
-$ make stage3
+$ make stage2
 ```
 
-## Stage 4 - install Jenkins
+## Stage 3 - install Jenkins
 
 
 ```sh
