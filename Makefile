@@ -53,11 +53,11 @@ deis-install: bin/helm
 	echo 'sleeping 10s to wait for tiller'
 	sleep 10
 	bin/helm repo add deis https://charts.deis.com/workflow
-	bin/helm install --namespace=deis -n deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
+	bin/helm install --namespace=deis -n deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f deis.values.yaml
 
 .PHONY:
 deis-upgrade: bin/helm
-	bin/helm upgrade --namespace=deis deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
+	bin/helm upgrade --namespace=deis deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f deis.values.yaml
 
 .PHONY: deis-status
 deis-status:

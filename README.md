@@ -40,9 +40,9 @@ See https://deis.com/docs/workflow/installing-workflow/configuring-object-storag
 **(GKE)** Steps:
 
 1. Create a service account at https://console.cloud.google.com/apis/credentials/serviceaccountkey - give the service account the `Storage Admin` role. ![example service account setup](gke-service-account.png)
-2. create `values.yaml` using `values.yaml.gke_example` as a guide.
+2. create `deis.values.yaml` using `deis.values.yaml.gke_example` as a guide.
 
-Once you're done setting up `values.yaml` (or making it blank to accept defaults):
+Once you're done setting up `deis.values.yaml` (or making it blank to accept defaults):
 
 ```sh
 $ make stage2
