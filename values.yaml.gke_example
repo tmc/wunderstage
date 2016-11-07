@@ -10,7 +10,6 @@ gcs:
 
 controller:
   app_pull_policy: "Always"
-  registration_mode: "admin_only"
 
 registry-token-refresher:
   gcr:

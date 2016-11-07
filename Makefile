@@ -26,7 +26,7 @@ stage1: images-release
 stage2: deis-install
 
 .PHONY: stage3
-stage4: jenkins-install
+stage3: jenkins-install
 
 .PHONY: images
 images:
@@ -51,9 +51,13 @@ bin/deis:
 deis-install: bin/helm
 	bin/helm init
 	echo 'sleeping 10s to wait for tiller'
-	sleep 1
+	sleep 10
 	bin/helm repo add deis https://charts.deis.com/workflow
 	bin/helm install --namespace=deis -n deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
+
+.PHONY:
+deis-upgrade: bin/helm
+	bin/helm upgrade --namespace=deis deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
 
 .PHONY: deis-status
 deis-status:
@@ -97,11 +101,11 @@ secrets/dhparam:
 jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam charts/jenkins/jenkins-deis-conf.json
 	 cp secrets/* charts/jenkins/
 	 helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-1 charts/jenkins
-	 echo "running 'kubectl --namespace=ci describe svc ci-1-proxy` to inspect service'"
-	 kubectl --namespace=ci describe svc ci-1-proxy | grep Ingress
+	 echo "running 'kubectl --namespace=ci describe svc ci-1-proxy' to inspect service'"
+	 kubectl --namespace=ci describe svc ci-1-proxy
 	 echo "sleeping 10s then running again"
 	 sleep 10
-	 kubectl --namespace=ci describe svc ci-1-proxy | grep Ingress
+	 kubectl --namespace=ci describe svc ci-1-proxy
 
 .PHONY: jenkins-reinstall
 jenkins-reinstall:
