@@ -21,7 +21,7 @@ These commands are designed to be run withing a Google Cloud Shell for maximum s
 $ make stage0 
 ```
 
-* **Verification**: `kubectl get po` runs successfully.
+* **Verification**: `kubectl cluster-info` runs successfully and is pointed to your cluster.
 
 ## Stage 1 - generate images
 
