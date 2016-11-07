@@ -51,6 +51,13 @@ $ make stage2
 
 ## Stage 3 - install Jenkins
 
+* **Prerequisites**: configure your default storage class in your k8s cluster if you haven't already.
+
+**(GKE)** Steps:
+
+```sh
+$ kubectl create -f default-storage-class.yaml
+```
 
 ```sh
 $ make stage3
