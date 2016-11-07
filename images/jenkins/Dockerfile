@@ -17,7 +17,7 @@ RUN wget https://storage.googleapis.com/workflow-cli-release/deis-${DEIS_VERSION
 RUN wget https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl; mv kubectl /usr/local/bin/kubectl; chmod +x /usr/local/bin/kubectl
 RUN wget https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz; tar xf ./helm-${HELM_VERSION}-linux-amd64.tar.gz; mv linux-amd64/* /usr/local/bin/
 
-RUN /usr/local/bin/install-plugins.sh github-branch-source github-oauth ssh-agent ansicolor
+RUN /usr/local/bin/install-plugins.sh github-organization-folder github-oauth ssh-agent ansicolor lockable-resources
 COPY custom.groovy /usr/share/jenkins/ref/init.groovy.d/custom.groovy
 
 # TODO(tmc) run dind docker in separate container?
