@@ -1,6 +1,6 @@
 global:
   storage: gcs
-  registry_location: gcs
+  registry_location: gcr
 
 gcs:
   key_json: 'Paste JSON data here.'
