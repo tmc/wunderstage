@@ -2,11 +2,16 @@ all: images
 
 export PATH := $(PWD)/bin:$(PATH)
 
-CLUSTER_NAME ?= wunderstage-2
-WORKFLOW_VERSION ?= v2.3.0
+CLUSTER_NAME ?= wunderstage-1
+WORKFLOW_VERSION ?= v2.8.0
 PROJECT ?= $(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
 DEIS_IP := $(shell sh -c 'kubectl --namespace=deis describe svc deis-router |grep "LoadBalancer Ingress" | cut -f2')
 DEIS_ENDPOINT := http://deis.$(DEIS_IP).nip.io
+HELM_VERSION ?= v2.0.0-rc.2
+
+# if using gke
+GKE_ZONE ?= us-west1-b
+GKE_MACHINE_TYPE ?= n1-standard-1
 
 # status lookups
 HAS_K8SCLUSTER := $(shell kubectl cluster-info > /dev/null;)
@@ -18,14 +23,10 @@ stage0: cluster-init
 stage1: images-release
 
 .PHONY: stage2
-stage2: deis-fetch
+stage2: deis-install
 
 .PHONY: stage3
-stage3: deis-install
-
-.PHONY: stage4
 stage4: jenkins-install
-
 
 .PHONY: images
 images:
@@ -39,26 +40,17 @@ release: images
 deploy: release
 
 .PHONY: cluster-init
-	gcloud containers clusters create $(CLUSTER_NAME) --zone "us-west1-b" --machine-type "n1-standard-1" --scopes "https://www.googleapis.com/auth/compute","https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly" --num-nodes "3" --network "default" --enable-cloud-logging --enable-cloud-monitoring
-
-bin/helmc:
-	curl -sSL https://get.helm.sh | bash
-	mv ./helmc ./bin/helmc
+cluster-init:
+	gcloud containers clusters create $(CLUSTER_NAME) --zone $(GKE_ZONE) --machine-type $(GKE_MACHINE_TYPE) --scopes "https://www.googleapis.com/auth/compute","https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly" --num-nodes "3" --network "default" --enable-cloud-logging --enable-cloud-monitoring
 
 bin/deis:
 	curl -sSL http://deis.io/deis-cli/install-v2.sh | bash
 	mv ./deis ./bin/deis
 
-.PHONY: deis-fetch
-deis-fetch: bin/helmc
-	helmc target
-	helmc repo add deis https://github.com/deis/charts || echo
-	helmc fetch deis/workflow-$(WORKFLOW_VERSION)
-
 .PHONY: deis-install
 deis-install: bin/helmc
-	helmc generate -x manifests workflow-$(WORKFLOW_VERSION)
-	helmc install workflow-$(WORKFLOW_VERSION)
+	helm repo add deis https://charts.deis.com/workflow
+	helm install deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
 
 .PHONY: deis-status
 deis-status:
@@ -66,7 +58,7 @@ deis-status:
 	kubectl --namespace=deis describe svc deis-router | grep LoadBalancer
 
 bin/helm:
-	curl -L https://github.com/kubernetes/helm/releases/download/v2.0.0-alpha.3/helm-v2.0.0-alpha.3-linux-amd64.tar | tar -C bin -xvf - 
+	curl -sSL http://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-linux-amd64.tar.gz | tar xvf-
 	mv bin/linux-amd64/* bin/
 	rmdir bin/linux-amd64
 
