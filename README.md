@@ -3,12 +3,12 @@ Wunderstage
 
 Cloud Native Continuous Integration
 
-Installing wunderstage is comprised of three stages:
+Installing wunderstage is comprised of the following stages:
 
-* stage0 - provisions a Kubernetes cluster.
-* stage1 - builds necessary images.
-* stage2 - installs PaaS framework (Deis).
-* stage3 - installs Jenkins.
+* `stage0` - provision a Kubernetes cluster.
+* `stage1` - builds necessary images.
+* `stage2` - installs PaaS framework (Deis).
+* `stage3` - installs Jenkins.
 
 These commands are designed to be run withing a Google Cloud Shell for maximum simplicity but can be adapted for other Kubernetes environments.
 
