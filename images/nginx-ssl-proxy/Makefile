@@ -8,4 +8,4 @@ image:
 
 release: image
 	docker tag -f nginx-ssl-proxy $(REGISTRY)/$(PROJECT)/nginx-ssl-proxy
-	gcloud docker push $(REGISTRY)/$(PROJECT)/nginx-ssl-proxy
+	gcloud docker -- push $(REGISTRY)/$(PROJECT)/nginx-ssl-proxy

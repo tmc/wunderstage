@@ -5,7 +5,7 @@ export PATH := $(PWD)/bin:$(PATH)
 CLUSTER_NAME ?= wunderstage-1
 WORKFLOW_VERSION ?= v2.8.0
 PROJECT ?= $(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
-DEIS_IP := $(shell sh -c 'kubectl --namespace=deis describe svc deis-router |grep "LoadBalancer Ingress" | cut -f2')
+DEIS_IP := $(shell sh -c 'kubectl --namespace=deis describe svc deis-router 2>&1|grep "LoadBalancer Ingress" | cut -f2')
 DEIS_ENDPOINT := http://deis.$(DEIS_IP).nip.io
 HELM_VERSION ?= v2.0.0-rc.2
 
@@ -33,7 +33,7 @@ images:
 	$(MAKE) -C images images
 
 .PHONY: images-release
-release: images
+images-release: images
 	$(MAKE) -C images release
 
 .PHONY: deploy
@@ -41,14 +41,15 @@ deploy: release
 
 .PHONY: cluster-init
 cluster-init:
-	gcloud containers clusters create $(CLUSTER_NAME) --zone $(GKE_ZONE) --machine-type $(GKE_MACHINE_TYPE) --scopes "https://www.googleapis.com/auth/compute","https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly" --num-nodes "3" --network "default" --enable-cloud-logging --enable-cloud-monitoring
+	gcloud container clusters create $(CLUSTER_NAME) --zone $(GKE_ZONE) --machine-type $(GKE_MACHINE_TYPE) --scopes "https://www.googleapis.com/auth/compute","https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly" --num-nodes "3" --network "default" --enable-cloud-logging --enable-cloud-monitoring
 
 bin/deis:
 	curl -sSL http://deis.io/deis-cli/install-v2.sh | bash
 	mv ./deis ./bin/deis
 
 .PHONY: deis-install
-deis-install: bin/helmc
+deis-install: bin/helm
+	helm init
 	helm repo add deis https://charts.deis.com/workflow
 	helm install deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
 
@@ -58,9 +59,9 @@ deis-status:
 	kubectl --namespace=deis describe svc deis-router | grep LoadBalancer
 
 bin/helm:
-	curl -sSL http://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-linux-amd64.tar.gz | tar xvf-
-	mv bin/linux-amd64/* bin/
-	rmdir bin/linux-amd64
+	curl -sSL http://storage.googleapis.com/kubernetes-helm/helm-$(HELM_VERSION)-linux-amd64.tar.gz | tar xzvf -
+	mv linux-amd64/* bin/
+	rmdir linux-amd64
 
 
 ## secrets 

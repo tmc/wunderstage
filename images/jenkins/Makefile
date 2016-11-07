@@ -8,4 +8,4 @@ image:
 
 release: image
 	docker tag -f jenkins $(REGISTRY)/$(PROJECT)/jenkins
-	gcloud docker push $(REGISTRY)/$(PROJECT)/jenkins
+	gcloud docker -- push $(REGISTRY)/$(PROJECT)/jenkins
