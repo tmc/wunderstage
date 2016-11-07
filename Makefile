@@ -49,9 +49,11 @@ bin/deis:
 
 .PHONY: deis-install
 deis-install: bin/helm
-	helm init
-	helm repo add deis https://charts.deis.com/workflow
-	helm install deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
+	bin/helm init
+	echo 'sleeping 10s to wait for tiller'
+	sleep 1
+	bin/helm repo add deis https://charts.deis.com/workflow
+	bin/helm install --namespace=deis -n deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f values.yaml
 
 .PHONY: deis-status
 deis-status:
@@ -93,9 +95,6 @@ secrets/dhparam:
 
 .PHONY: jenkins-install
 jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam charts/jenkins/jenkins-deis-conf.json
-	 helm version
-	 helm init
-	 sleep 5
 	 cp secrets/* charts/jenkins/
 	 helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-1 charts/jenkins
 	 echo "running 'kubectl --namespace=ci describe svc ci-1-proxy` to inspect service'"

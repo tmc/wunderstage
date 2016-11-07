@@ -15,7 +15,7 @@ These commands are designed to be run withing a Google Cloud Shell for maximum s
 ## Stage 0 - provision cluster
 
 * **Skip if**: you already have a Kubernetes cluster provisioned.
-* **Prerequisites**: `gcloud` command set up.
+* **Prerequisites**: `gcloud` command set up: https://cloud.google.com/sdk/gcloud/
 
 ```sh
 $ make stage0 
@@ -47,6 +47,7 @@ Once you're done setting up `values.yaml` (or making it blank to accept defaults
 ```sh
 $ make stage2
 ```
+* **Note**: if you encounter the 'Error: could not find a ready tiller pod' error you just need to wait a little and retry.
 
 ## Stage 3 - install Jenkins
 
