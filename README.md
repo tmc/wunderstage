@@ -231,7 +231,20 @@ At minimum you should change REGISTRATION mode on deis-controller.
 
 See https://deis.com/docs/workflow/managing-workflow/production-deployments
 
+Let's set up a helper alias
+```sh
+$ alias kd='kubectl --namespace=deis'
+```
 
+Platform SSL:
+```sh
+$ kd create --namespace=deis secret generic deis-router-platform-cert --from-file=tls.key --from-file=tls.crt
+```
+
+Forcing ssl:
+```sh
+$ kd annotate deployment deis-router router.deis.io/nginx.ssl.enforce=true
+```
 
 
 ## Troubleshooting
