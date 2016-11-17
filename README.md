@@ -97,6 +97,10 @@ kc describe svc ci-1-proxy |grep Ingress
 
 Visit that URL in a web browser.
 
+You'll first be presented with http basic auth which is username: jenkins, password: (contents of secrets/jenkins-basicauth).
+
+note: to change this modify `secrets/jenkins-basicauth` and run `make jenkins-upgrade`.
+
 To obtain the admin password we need to check stdout of the jenkins container:
 
 Let's set the pod name so we dont' have to re-type it:
@@ -124,6 +128,11 @@ Example kubectl invocation to replace parts of this secret:
 
 Assuming you have these four files in a directory you can update the existing secret like so:
 
+
+Changing to non-nip.io domain:
+
+- deis_builder
+- deis auth keys
 
 ```sh
 $ ls

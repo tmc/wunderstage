@@ -21,7 +21,7 @@ RUN wget https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VER
 RUN wget https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz; tar xf ./helm-${HELM_VERSION}-linux-amd64.tar.gz; mv linux-amd64/* /usr/local/bin/
 RUN wget https://bintray.com/deis/helm/download_file?file_path=helmc-${HELMC_VERSION}-linux-amd64.zip && unzip *helm*.zip; mv helmc /usr/local/bin/helmc
 
-RUN /usr/local/bin/install-plugins.sh github-organization-folder github-oauth ssh-agent ansicolor lockable-resources
+RUN /usr/local/bin/install-plugins.sh github-organization-folder github-oauth ssh-agent ansicolor lockable-resources slack
 COPY custom.groovy /usr/share/jenkins/ref/init.groovy.d/custom.groovy
 
 # TODO(tmc) run dind docker in separate container?
