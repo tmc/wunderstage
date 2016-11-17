@@ -33,17 +33,6 @@ spec:
           name: secrets-volume
         - mountPath: /var/run/docker.sock
           name: dockersocket
-      - name: fixperms
-        image: alpine
-        args:
-        - /bin/sh
-        - -c
-        - "mkdir /var/jenkins_home/.deis || echo; cp /etc/secrets/jenkins-deis-conf.json /var/jenkins_home/.deis/client.json; chown -R 1000:1000 /var/jenkins_home; cp -rv /var/jenkins_home/.deis /root/; sleep 1000"
-        volumeMounts:
-        - mountPath: /var/jenkins_home
-          name: storage-volume
-        - mountPath: /etc/secrets
-          name: secrets-volume
       - name: proxy
         image: "gcr.io/{{ .Values.PROJECT }}/nginx-ssl-proxy"
         ports:

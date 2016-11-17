@@ -5,8 +5,9 @@ export PATH := $(PWD)/bin:$(PATH)
 CLUSTER_NAME ?= wunderstage-1
 WORKFLOW_VERSION ?= v2.8.0
 PROJECT ?= $(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
-DEIS_IP := $(shell sh -c 'kubectl --namespace=deis describe svc deis-router 2>&1|grep "LoadBalancer Ingress" | cut -f2')
-DEIS_ENDPOINT := http://deis.$(DEIS_IP).nip.io
+DEIS_HOSTNAME ?= $(shell sh -c 'kubectl --namespace=deis describe svc deis-router 2>&1|grep "LoadBalancer Ingress" | cut -f2').nip.io
+DEIS_ENDPOINT ?= http://deis.$(DEIS_HOSTNAME)
+DEIS_BUILDER ?= deis-builder.$(DEIS_HOSTNAME)
 HELM_VERSION ?= v2.0.0-rc.2
 
 # if using gke
@@ -75,23 +76,26 @@ bin/helm:
 secrets/id_rsa-deis.pub:
 	ssh-keygen -t rsa -N "" -f secrets/id_rsa-deis
 
-secrets/.deispw:
+secrets/deispw:
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
 
-secrets/.deispw-jenkins:
+secrets/deispw-jenkins:
 	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
 
-charts/jenkins/jenkins-deis-conf.json: bin/deis secrets/.deispw secrets/.deispw-jenkins secrets/id_rsa-deis.pub
-	deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat secrets/.deispw) --email=admin@foobar.com
-	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat secrets/.deispw-jenkins) --email=ci@foobar.com
+secrets/jenkins-basicauth:
+	dd if=/dev/urandom bs=1 count=32 2>/dev/null | base64 | tr -d '\n' > $@
+
+charts/jenkins/jenkins-deis-conf.json: bin/deis secrets/deispw secrets/deispw-jenkins secrets/id_rsa-deis.pub
+	deis register $(DEIS_ENDPOINT) --username=admin --password=$(shell cat secrets/deispw) --email=admin@foobar.com
+	DEIS_PROFILE=jenkins deis register $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat secrets/deispw-jenkins) --email=ci@foobar.com
 	DEIS_PROFILE=jenkins deis keys:add secrets/id_rsa-deis.pub
 	cp ~/.deis/jenkins.json $@
 
-secrets/htpasswd: secrets/.deispw-jenkins
-	echo "jenkins:$(shell cat secrets/.deispw-jenkins | openssl passwd -stdin)" > secrets/htpasswd
+secrets/htpasswd: secrets/jenkins-basicauth
+	echo "jenkins:$(shell cat secrets/jenkins-basicauth | openssl passwd -stdin)" > secrets/htpasswd
 
 secrets/key.pem:
-	cd secrets && openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=CA/L=SF/O=Ops/CN=ci.$(DEIS_IP)" -nodes
+	cd secrets && openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -subj "/C=US/ST=CA/L=SF/O=Ops/CN=ci.$(DEIS_HOSTNAME)" -nodes
 
 secrets/dhparam:
 	openssl dhparam -out secrets/dhparam 2048 -dsaparam
@@ -99,14 +103,22 @@ secrets/dhparam:
 
 .PHONY: jenkins-install
 jenkins-install: bin/helm secrets/key.pem secrets/htpasswd secrets/dhparam charts/jenkins/jenkins-deis-conf.json
-	 cp secrets/* charts/jenkins/
-	 helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-1 charts/jenkins
-	 echo "running 'kubectl --namespace=ci describe svc ci-1-proxy' to inspect service'"
-	 kubectl --namespace=ci describe svc ci-1-proxy
-	 echo "sleeping 10s then running again"
-	 sleep 10
-	 kubectl --namespace=ci describe svc ci-1-proxy
+	cp secrets/* charts/jenkins/
+	helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=$(DEIS_BUILDER) -n ci-1 charts/jenkins
+	echo "running 'kubectl --namespace=ci describe svc ci-1-proxy' to inspect service'"
+	kubectl --namespace=ci describe svc ci-1-proxy
+	echo "sleeping 10s then running again"
+	sleep 10
+	kubectl --namespace=ci describe svc ci-1-proxy
 
-.PHONY: jenkins-reinstall
-jenkins-reinstall:
-	helm install --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=deis-builder.$(DEIS_IP).nip.io -n ci-foobar charts/jenkins --debug --dry-run | sed '1,/MANIFEST:/d' | sed 's/ci-foobar/ci-1/g' | kubectl --namespace=ci apply -f -
+.PHONY: reren-jenkins-deis-conf
+regen-jenkins-deis-conf:
+	deis login $(DEIS_ENDPOINT) --username=admin --password=$(shell cat secrets/deispw)
+	DEIS_PROFILE=jenkins deis login $(DEIS_ENDPOINT) --username=jenkins --password=$(shell cat secrets/deispw-jenkins)
+	rm -f charts/jenkins/jenkins-deis-conf.json
+	cp ~/.deis/jenkins.json charts/jenkins/jenkins-deis-conf.json
+
+.PHONY: jenkins-upgrade
+jenkins-upgrade: secrets/key.pem secrets/htpasswd secrets/dhparam charts/jenkins/jenkins-deis-conf.json
+	cp secrets/* charts/jenkins/
+	helm upgrade --namespace=ci --set PROJECT=$(PROJECT),deisBuilder=$(DEIS_BUILDER) ci-1 charts/jenkins
