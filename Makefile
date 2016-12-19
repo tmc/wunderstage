@@ -3,12 +3,12 @@ all: images
 export PATH := $(PWD)/bin:$(PATH)
 
 CLUSTER_NAME ?= wunderstage-1
-WORKFLOW_VERSION ?= v2.8.0
+WORKFLOW_VERSION ?= v2.9.1
 PROJECT ?= $(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
 DEIS_HOSTNAME ?= $(shell sh -c 'kubectl --namespace=deis describe svc deis-router 2>&1|grep "LoadBalancer Ingress" | cut -f2').nip.io
 DEIS_ENDPOINT ?= http://deis.$(DEIS_HOSTNAME)
 DEIS_BUILDER ?= deis-builder.$(DEIS_HOSTNAME)
-HELM_VERSION ?= v2.0.0-rc.2
+HELM_VERSION ?= v2.0.0
 
 # if using gke
 GKE_ZONE ?= us-west1-b

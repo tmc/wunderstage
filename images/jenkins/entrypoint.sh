@@ -1,6 +1,9 @@
 #!/bin/sh
 mkdir ~/.ssh || echo
-ssh-keyscan -p 2222 ${DEIS_BUILDER},$(getent hosts ${DEIS_BUILDER} | awk '{ print $1 }') > /root/.ssh/known_hosts
+until (grep deis-builder /root/.ssh/known_hosts); do (
+  ssh-keyscan -p 2222 ${DEIS_BUILDER},$(getent hosts ${DEIS_BUILDER} | awk '{ print $1 }') > /root/.ssh/known_hosts
+); sleep 5; echo 'attempting known_hosts population'; date; done
+
 mkdir ~jenkins/.ssh || echo
 cp /root/.ssh/known_hosts ~jenkins/.ssh/known_hosts
 chown -R jenkins:jenkins ~jenkins/.ssh

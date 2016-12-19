@@ -13,7 +13,7 @@ RUN gpasswd -a jenkins docker
 
 ENV DEIS_VERSION stable
 ENV KUBECTL_VERSION v1.4.5
-ENV HELM_VERSION v2.0.0-rc.2
+ENV HELM_VERSION v2.0.0
 ENV HELMC_VERSION 0.8.1%2Be4b3983
 
 RUN wget https://storage.googleapis.com/workflow-cli-release/deis-${DEIS_VERSION}-linux-amd64; mv deis-${DEIS_VERSION}-linux-amd64 /usr/local/bin/deis; chmod +x /usr/local/bin/deis
