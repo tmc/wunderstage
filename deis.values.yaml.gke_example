@@ -3,7 +3,7 @@ global:
   registry_location: gcr
 
 gcs:
-  key_json: 'Paste JSON data here.'
+  key_json: 'Paste base64 encoded JSON data here.'
   registry_bucket: "your-registry-bucket-name"
   database_bucket: "your-database-bucket-name"
   builder_bucket: "your-builder-bucket-name"
@@ -13,4 +13,4 @@ controller:
 
 registry-token-refresher:
   gcr:
-    key_json: 'Paste JSON data here.'
+    key_json: 'Paste base64 encoded JSON data here.'
