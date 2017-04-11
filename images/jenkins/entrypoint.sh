@@ -1,8 +1,10 @@
 #!/bin/sh
 mkdir ~/.ssh || echo
+(
 until (grep deis-builder /root/.ssh/known_hosts); do (
   ssh-keyscan -p 2222 ${DEIS_BUILDER},$(getent hosts ${DEIS_BUILDER} | awk '{ print $1 }') > /root/.ssh/known_hosts
 ); sleep 5; echo 'attempting known_hosts population'; date; done
+) &
 
 mkdir ~jenkins/.ssh || echo
 cp /root/.ssh/known_hosts ~jenkins/.ssh/known_hosts
@@ -13,4 +15,5 @@ cp /etc/secrets/jenkins-deis-conf.json ~jenkins/.deis/client.json
 chown -R jenkins:jenkins ~jenkins/.ssh
 
 2>&1
+#while true; do /usr/local/bin/jenkins.sh; sleep 10; date; done #dbg
 exec /usr/local/bin/jenkins.sh

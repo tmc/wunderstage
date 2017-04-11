@@ -2,13 +2,13 @@ all: images
 
 export PATH := $(PWD)/bin:$(PATH)
 
-CLUSTER_NAME ?= wunderstage-1
-WORKFLOW_VERSION ?= v2.10.0
+CLUSTER_NAME ?= wunderstage-2
+WORKFLOW_VERSION ?= v2.13.0
 PROJECT ?= $(shell gcloud config list --format 'value(core.project)' 2>/dev/null)
 DEIS_HOSTNAME ?= $(shell sh -c 'kubectl --namespace=deis describe svc deis-router 2>&1|grep "LoadBalancer Ingress" | cut -f2').nip.io
 DEIS_ENDPOINT ?= http://deis.$(DEIS_HOSTNAME)
 DEIS_BUILDER ?= deis-builder.$(DEIS_HOSTNAME)
-HELM_VERSION ?= v2.0.0
+HELM_VERSION ?= v2.3.0
 
 # if using gke
 GKE_ZONE ?= us-west1-b
@@ -54,11 +54,11 @@ deis-install: bin/helm
 	echo 'sleeping 10s to wait for tiller'
 	sleep 10
 	bin/helm repo add deis https://charts.deis.com/workflow
-	bin/helm install --namespace=deis -n deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f deis.values.yaml
+	bin/helm install --namespace=deis -n deis deis/workflow --version=$(WORKFLOW_VERSION) -f deis.values.yaml
 
 .PHONY:
 deis-upgrade: bin/helm
-	bin/helm upgrade --namespace=deis deis deis/workflow --version=$(WORKFLOW_VERSION) --namespace=deis -f deis.values.yaml
+	bin/helm upgrade --namespace=deis deis deis/workflow --version=$(WORKFLOW_VERSION) -f deis.values.yaml
 
 .PHONY: deis-status
 deis-status:
