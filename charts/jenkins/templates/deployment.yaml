@@ -18,12 +18,21 @@ spec:
       - name: jenkins
         image: gcr.io/{{ .Values.PROJECT }}/jenkins
         imagePullPolicy: {{default "Always" .Values.pullPolicy}}
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 3Gi
         env:
           - name: DEIS_BUILDER
             valueFrom:
               configMapKeyRef:
                 name: {{template "fullname" . }}
                 key: deis.builder
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 3
         ports:
         - containerPort: 8080
         volumeMounts:
