@@ -12,7 +12,7 @@ RUN apt-get install -y docker-engine=1.9.1-0~jessie # version on gce at time of 
 RUN gpasswd -a jenkins docker
 
 ENV DEIS_VERSION stable
-ENV KUBECTL_VERSION v1.4.5
+ENV KUBECTL_VERSION v1.6.0
 ENV HELM_VERSION v2.0.0
 ENV HELMC_VERSION 0.8.1%2Be4b3983
 
