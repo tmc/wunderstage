@@ -55,6 +55,8 @@ deis-install: bin/helm
 	sleep 10
 	bin/helm repo add deis https://charts.deis.com/workflow
 	bin/helm install --namespace=deis -n deis deis/workflow --version=$(WORKFLOW_VERSION) -f deis.values.yaml
+	kubectl --namespace=deis annotate deployment deis-router router.deis.io/nginx.serverNameHashBucketSize=128
+	kubectl --namespace=deis annotate deployment deis-database security.alpha.kubernetes.io/sysctls=fs.pipe-user-pages-soft=0
 
 .PHONY:
 deis-upgrade: bin/helm
